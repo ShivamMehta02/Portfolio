@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>RAG Pipeline Explorer — Shivam Mehta</title>
-  <meta name="description" content="Interactive RAG system design explorer by Shivam Mehta. Click each pipeline node to explore sub-workflows, trade-offs, and engineering decisions."/>
+  <title>RAG System Explorer — Shivam Mehta</title>
+  <meta name="description" content="Interactive hierarchical RAG system explorer — click any node to explore internal workflow, problems, solutions, and engineering trade-offs."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -13,56 +13,55 @@
 <body>
 
 <nav class="exp-nav">
-  <a href="index.html" class="back-btn">← Back to Portfolio</a>
-  <span class="exp-nav-title">RAG Pipeline Explorer</span>
-  <span class="exp-nav-hint">Click any node to explore</span>
+  <a href="index.html" class="back-btn">← Portfolio</a>
+  <div class="nav-center">
+    <span class="exp-nav-title">RAG System Explorer</span>
+    <span class="exp-nav-badge">Interactive · Multi-level</span>
+  </div>
+  <span class="exp-nav-hint">Click any node → expand layers</span>
 </nav>
 
 <main class="exp-main">
 
-  <!-- LEFT: PIPELINE -->
-  <aside class="pipeline-panel" id="pipelinePanel">
+  <!-- LEFT: PIPELINE NODES (LEVEL 1) -->
+  <aside class="pipeline-panel">
     <div class="pipeline-header">
-      <div class="pipeline-label">// System Architecture</div>
-      <h1 class="pipeline-title">Production RAG Pipeline</h1>
-      <p class="pipeline-sub">Click any node to explore its sub-workflow, engineering decisions, and trade-offs.</p>
+      <div class="pipeline-label">// Level 1 — Main Pipeline</div>
+      <h1 class="pipeline-title">Production RAG</h1>
+      <p class="pipeline-sub">Select a component to explore its internals, problems, and solutions.</p>
     </div>
-
-    <div class="pipeline-nodes" id="pipelineNodes">
-      <!-- Nodes injected by JS -->
-    </div>
-
-    <div class="pipeline-footer">
-      <div class="tech-badges">
-        <span class="badge">FastAPI</span>
-        <span class="badge">Qdrant</span>
-        <span class="badge">BM25</span>
-        <span class="badge">Cross-Encoder</span>
-        <span class="badge">OpenAI</span>
-      </div>
+    <div class="pipeline-nodes" id="pipelineNodes"></div>
+    <div class="pipeline-legend">
+      <div class="legend-item"><span class="lbadge flow">flow</span>Internal steps</div>
+      <div class="legend-item"><span class="lbadge problem">problem</span>Issues faced</div>
+      <div class="legend-item"><span class="lbadge solution">solution</span>How solved</div>
+      <div class="legend-item"><span class="lbadge insight">insight</span>Trade-offs</div>
+      <div class="legend-item"><span class="lbadge failure">failure</span>Failure cases</div>
     </div>
   </aside>
 
-  <!-- RIGHT: DETAIL PANEL -->
-  <section class="detail-panel" id="detailPanel">
-    <div class="detail-empty" id="detailEmpty">
-      <div class="empty-icon">🔍</div>
-      <h2>Select a pipeline node</h2>
-      <p>Click any node on the left to explore its sub-workflow, engineering decisions, trade-offs, and failure modes.</p>
-      <div class="empty-hint">
-        <span>Start with</span>
-        <strong>User Query</strong>
-        <span>or jump to</span>
-        <strong>Hybrid Retrieval</strong>
+  <!-- RIGHT: HIERARCHICAL TREE -->
+  <section class="tree-panel" id="treePanel">
+    <div class="tree-empty" id="treeEmpty">
+      <div class="empty-icon">🌳</div>
+      <h2>Select a pipeline component</h2>
+      <p>Each component expands into a multi-level tree showing internal workflow, problems faced, solutions implemented, engineering insights, and failure cases.</p>
+      <div class="kbd-hints">
+        <span class="kbd">↑ ↓</span> Navigate nodes
+        <span class="kbd">Space</span> Expand all
+        <span class="kbd">Esc</span> Collapse all
       </div>
     </div>
-    <div class="detail-content" id="detailContent" style="display:none;">
-      <!-- Content injected by JS -->
+    <div class="tree-content" id="treeContent" style="display:none;">
+      <div class="tree-header" id="treeHeader"></div>
+      <div class="tree-root" id="treeRoot"></div>
     </div>
   </section>
 
 </main>
 
-<script src="explorer.js"></script>
+  <script src="explorer-data.js"></script>
+  <script src="explorer-render.js"></script>
+  <script src="explorer-state.js"></script>
 </body>
 </html>
