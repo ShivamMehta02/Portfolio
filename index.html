@@ -57,26 +57,66 @@
   <div class="container">
     <div class="section-label">// About</div>
     <div class="about-grid">
-      <div class="about-left">
+      <!-- Profile Photo Column -->
+      <div class="about-photo-col">
+        <div class="profile-card">
+          <div class="profile-img-container">
+            <img src="profile.jpg" alt="Shivam Mehta" class="profile-img">
+            <div class="profile-glow"></div>
+          </div>
+          <div class="profile-info-card">
+            <div class="info-row">
+              <span class="info-label">Current Role</span>
+              <span class="info-val">AI Systems Engineer</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Status</span>
+              <span class="info-val avail">🟢 Hiring Ready</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Text Column -->
+      <div class="about-text-col">
         <h2 class="section-title">I build real AI systems.<br/>Not just models.</h2>
         <p class="about-text">I am a final-year AIML student focused on building real-world AI systems rather than just training models. My work centers around designing end-to-end pipelines — from data ingestion and embeddings to retrieval optimization and response generation.</p>
-        <p class="about-text">My work centers around:</p>
-        <ul class="about-list">
-          <li><span class="list-dot"></span>Retrieval-Augmented Generation (RAG)</li>
-          <li><span class="list-dot"></span>LLM-based automation systems</li>
-          <li><span class="list-dot"></span>Backend APIs for scalable AI deployment</li>
-        </ul>
-        <p class="about-text" style="margin-top:20px;">Problems I focus on solving:</p>
-        <ul class="about-list">
-          <li><span class="list-dot accent"></span>Reducing hallucination in LLMs</li>
-          <li><span class="list-dot accent"></span>Improving retrieval quality</li>
-          <li><span class="list-dot accent"></span>Optimizing latency for production systems</li>
-        </ul>
-      </div>
-      <div class="about-right">
-        <div class="about-card"><div class="about-card-icon">⚙️</div><h3>System Builder</h3><p>Architecture first — data flow, latency, failure modes — before writing a single line of model code.</p></div>
-        <div class="about-card"><div class="about-card-icon">📐</div><h3>Trade-off Aware</h3><p>Every optimization involves a trade-off. I measure them and make decisions with data, not intuition.</p></div>
-        <div class="about-card"><div class="about-card-icon">🚀</div><h3>Production Minded</h3><p>APIs, vector indexes, async endpoints — I build things that can run 24/7, not just in a demo.</p></div>
+        
+        <div class="about-sub-grid">
+          <div class="about-sub-col">
+            <p class="about-subtitle">Focus Areas</p>
+            <ul class="about-list">
+              <li><span class="list-dot"></span>RAG Pipelines</li>
+              <li><span class="list-dot"></span>LLM Automation</li>
+              <li><span class="list-dot"></span>Backend AI APIs</li>
+            </ul>
+          </div>
+          <div class="about-sub-col">
+            <p class="about-subtitle">Solving For</p>
+            <ul class="about-list">
+              <li><span class="list-dot accent"></span>Hallucination</li>
+              <li><span class="list-dot accent"></span>Retrieval Quality</li>
+              <li><span class="list-dot accent"></span>System Latency</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="about-philosophy">
+          <div class="phil-item">
+            <span class="phil-icon">⚙️</span>
+            <div>
+              <strong>System Builder</strong>
+              <p>Architecture first — data flow, latency, and failure modes.</p>
+            </div>
+          </div>
+          <div class="phil-item">
+            <span class="phil-icon">📐</span>
+            <div>
+              <strong>Trade-off Aware</strong>
+              <p>I measure trade-offs and make decisions with data.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
