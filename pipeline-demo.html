@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Pipeline Demo</title>
+  <title>AI Pipeline Demo — Interactive RAG System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -16,90 +16,105 @@
       --border: rgba(255,255,255,0.1);
       --text: #f3f4f6;
       --text-muted: #a4b0c4;
+      --text-dim: #6b7280;
       --blue: #60a5fa;
       --blue-strong: #2563eb;
       --green: #34d399;
       --purple: #a78bfa;
       --cyan: #22d3ee;
-      --danger: #f87171;
       --radius: 18px;
     }
 
-    * { box-sizing: border-box; }
-    html, body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-    body { min-height: 100vh; }
-    a { color: inherit; text-decoration: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { 
+      height: 100%;
+      font-family: 'Inter', -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      line-height: 1.6;
+    }
 
     .page {
       min-height: 100vh;
       background:
-        radial-gradient(circle at top left, rgba(96,165,250,0.15), transparent 25%),
-        radial-gradient(circle at bottom right, rgba(167,139,250,0.12), transparent 30%),
+        radial-gradient(circle at 20% 30%, rgba(96,165,250,0.12), transparent 25%),
+        radial-gradient(circle at 80% 70%, rgba(167,139,250,0.1), transparent 30%),
         var(--bg);
     }
 
-    .topbar {
+    /* HEADER */
+    header {
       position: sticky;
       top: 0;
-      z-index: 20;
-      background: rgba(5,8,16,0.75);
-      backdrop-filter: blur(18px);
+      z-index: 50;
+      background: rgba(5,8,16,0.8);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
     }
 
-    .topbar-inner {
-      max-width: 1400px;
+    .header-inner {
+      max-width: 1500px;
       margin: 0 auto;
-      padding: 14px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .brand {
-      font-size: 1.1rem;
+    .logo {
+      font-size: 1.15rem;
       font-weight: 800;
-      letter-spacing: -0.05em;
+      letter-spacing: -0.04em;
     }
 
-    .brand span { color: var(--blue); }
-    .back-link {
+    .logo span { color: var(--blue); }
+
+    .nav-link {
       color: var(--text-muted);
-      font-size: 0.88rem;
-      padding: 8px 12px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 8px 14px;
       border: 1px solid var(--border);
       border-radius: 10px;
-      transition: 0.2s ease;
+      transition: all 0.25s ease;
     }
-    .back-link:hover { border-color: rgba(96,165,250,0.4); color: var(--text); }
 
+    .nav-link:hover {
+      border-color: rgba(96,165,250,0.4);
+      color: var(--text);
+      background: rgba(96,165,250,0.08);
+    }
+
+    /* SHELL */
     .shell {
-      max-width: 1400px;
+      max-width: 1500px;
       margin: 0 auto;
-      padding: 48px 24px 80px;
+      padding: 60px 24px 100px;
     }
 
+    /* HERO SECTION */
     .hero {
       display: grid;
-      grid-template-columns: 1.1fr 1.4fr;
-      gap: 36px;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 48px;
       align-items: start;
-      margin-bottom: 32px;
+      margin-bottom: 40px;
     }
 
     .eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(52,211,153,0.08);
-      border: 1px solid rgba(52,211,153,0.2);
-      color: #7ef0c4;
-      padding: 7px 12px;
+      background: rgba(52,211,153,0.1);
+      border: 1px solid rgba(52,211,153,0.25);
+      color: #6ee7b7;
+      padding: 8px 14px;
       border-radius: 999px;
       font-size: 0.75rem;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      margin-bottom: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
     }
 
     .eyebrow::before {
@@ -108,41 +123,40 @@
       height: 8px;
       background: var(--green);
       border-radius: 50%;
-      display: block;
-      box-shadow: 0 0 12px rgba(52,211,153,0.8);
+      box-shadow: 0 0 14px rgba(52,211,153,0.9);
     }
 
     h1 {
-      margin: 0 0 18px;
-      font-size: clamp(2.1rem, 4vw, 4rem);
-      line-height: 1.08;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      line-height: 1.1;
       letter-spacing: -0.08em;
+      font-weight: 900;
+      margin-bottom: 20px;
     }
 
-    .gradient {
+    .gradient-text {
       background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 45%, var(--cyan) 100%);
       -webkit-background-clip: text;
       background-clip: text;
-      color: transparent;
+      -webkit-text-fill-color: transparent;
     }
 
-    .subtext {
-      font-size: 1.06rem;
-      line-height: 1.8;
+    .intro-text {
+      font-size: 1.08rem;
+      line-height: 1.85;
       color: var(--text-muted);
-      max-width: 620px;
+      max-width: 580px;
+      margin-bottom: 28px;
     }
 
-    .feature-list {
+    .features {
       list-style: none;
       display: grid;
-      gap: 12px;
-      margin: 28px 0 0;
-      padding: 0;
-      max-width: 520px;
+      gap: 14px;
+      max-width: 540px;
     }
 
-    .feature-list li {
+    .features li {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -150,130 +164,160 @@
       font-size: 0.96rem;
     }
 
-    .feature-list li::before {
-      content: "↗";
-      color: var(--blue);
-      font-weight: 800;
+    .features li::before {
+      content: "✓";
+      color: var(--green);
+      font-weight: 900;
       font-size: 1.1rem;
     }
 
-    .demo-panel {
+    /* MAIN DEMO GRID */
+    .demo-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      align-items: start;
+      gap: 28px;
     }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
-    }
-
-    .pipeline-wrap {
-      min-height: 420px;
+      padding: 26px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
       display: flex;
       flex-direction: column;
     }
 
-    .panel-title {
-      font-size: 0.75rem;
+    .card-title {
+      font-size: 0.78rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       color: var(--blue);
       font-weight: 700;
-      margin-bottom: 14px;
+      margin-bottom: 18px;
+    }
+
+    /* PIPELINE CARD */
+    .pipeline-card {
+      min-height: 520px;
     }
 
     .pipeline-canvas {
       position: relative;
-      height: 300px;
-      background: linear-gradient(180deg, rgba(96,165,250,0.06), rgba(167,139,250,0.04));
-      border: 1px solid rgba(96,165,250,0.12);
-      border-radius: 14px;
+      height: 360px;
+      background: linear-gradient(135deg, rgba(96,165,250,0.08), rgba(167,139,250,0.06));
+      border: 1px solid rgba(96,165,250,0.15);
+      border-radius: 16px;
+      margin-bottom: 18px;
       overflow: hidden;
     }
 
-    .pipeline-node {
+    .node {
       position: absolute;
       width: 110px;
-      height: 96px;
-      border-radius: 16px;
+      height: 110px;
+      border-radius: 18px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, rgba(96,165,250,0.8), rgba(37,99,235,0.9));
-      border: 1px solid rgba(255,255,255,0.2);
-      box-shadow: 0 10px 28px rgba(37,99,235,0.25);
+      background: linear-gradient(135deg, rgba(96,165,250,0.85), rgba(37,99,235,0.95));
+      border: 2px solid rgba(255,255,255,0.18);
+      box-shadow: 0 12px 32px rgba(37,99,235,0.28);
       cursor: pointer;
-      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       user-select: none;
       text-align: center;
-      padding: 8px;
+      padding: 10px;
     }
 
-    .pipeline-node:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 14px 36px rgba(96,165,250,0.4);
+    .node:hover {
+      transform: translateY(-6px) scale(1.08);
+      box-shadow: 0 18px 48px rgba(96,165,250,0.42);
+      border-color: rgba(255,255,255,0.32);
     }
 
-    .pipeline-node.active {
-      background: linear-gradient(135deg, rgba(52,211,153,0.9), rgba(16,185,129,0.9));
-      box-shadow: 0 16px 38px rgba(52,211,153,0.38);
-      border-color: rgba(255,255,255,0.34);
-      animation: pulse 1.2s ease-in-out infinite;
+    .node.active {
+      background: linear-gradient(135deg, rgba(52,211,153,0.95), rgba(16,185,129,1));
+      box-shadow: 0 20px 50px rgba(52,211,153,0.42);
+      border-color: rgba(255,255,255,0.4);
+      animation: pulse-active 1.4s ease-in-out infinite;
     }
 
-    @keyframes pulse {
+    @keyframes pulse-active {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.06); }
+      50% { transform: scale(1.08); }
     }
 
-    .pipe-icon { font-size: 1.8rem; margin-bottom: 6px; }
-    .pipe-label {
-      font-size: 0.68rem;
+    .node-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .node-label {
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      line-height: 1.2;
+      letter-spacing: 0.03em;
+      line-height: 1.3;
       color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
+    .pipeline-info {
+      background: rgba(96,165,250,0.08);
+      border: 1px solid rgba(96,165,250,0.15);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* CHAT CARD */
     .chat-card {
-      min-height: 420px;
+      min-height: 520px;
       display: flex;
       flex-direction: column;
     }
 
-    .chat-box {
+    .chat-messages {
       flex: 1;
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 12px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       overflow-y: auto;
-      max-height: 300px;
       margin-bottom: 14px;
+      min-height: 300px;
+      max-height: 360px;
     }
 
     .message {
       display: flex;
-      max-width: 80%;
-      padding: 10px 12px;
-      border-radius: 12px;
+      max-width: 85%;
+      padding: 12px 14px;
+      border-radius: 14px;
       font-size: 0.88rem;
       line-height: 1.6;
-      word-break: break-word;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .message.bot {
-      background: rgba(96,165,250,0.12);
-      border: 1px solid rgba(96,165,250,0.18);
+      background: linear-gradient(135deg, rgba(96,165,250,0.15), rgba(96,165,250,0.08));
+      border: 1px solid rgba(96,165,250,0.2);
       color: var(--text);
       align-self: flex-start;
     }
@@ -282,11 +326,36 @@
       background: linear-gradient(135deg, var(--blue), var(--blue-strong));
       color: white;
       align-self: flex-end;
+      box-shadow: 0 8px 24px rgba(37,99,235,0.3);
     }
 
-    .message strong { color: inherit; }
+    .message strong { font-weight: 700; }
+    .message em { font-style: italic; opacity: 0.9; }
 
-    .chat-input-row {
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 14px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--blue);
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+      30% { opacity: 1; transform: translateY(-10px); }
+    }
+
+    .chat-input-box {
       display: flex;
       gap: 10px;
     }
@@ -299,12 +368,15 @@
       background: rgba(255,255,255,0.03);
       color: var(--text);
       font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
       outline: none;
+      transition: all 0.25s ease;
     }
 
     .chat-input:focus {
-      border-color: rgba(96,165,250,0.55);
-      box-shadow: 0 0 0 3px rgba(96,165,250,0.12);
+      border-color: rgba(96,165,250,0.6);
+      box-shadow: 0 0 0 3px rgba(96,165,250,0.15);
+      background: rgba(255,255,255,0.05);
     }
 
     .chat-send {
@@ -313,79 +385,105 @@
       background: linear-gradient(135deg, var(--blue), var(--blue-strong));
       color: white;
       font-weight: 700;
-      padding: 0 18px;
+      padding: 12px 20px;
       cursor: pointer;
-      transition: transform 0.2s ease, filter 0.2s ease;
+      font-size: 0.9rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 20px rgba(37,99,235,0.25);
     }
 
-    .chat-send:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
+    .chat-send:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(37,99,235,0.35);
     }
 
     .chat-send:disabled {
-      opacity: 0.5;
+      opacity: 0.6;
       cursor: wait;
       transform: none;
     }
 
-    .status-box {
+    .status-note {
+      font-size: 0.8rem;
+      color: var(--text-dim);
       margin-top: 12px;
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      line-height: 1.6;
-      padding: 10px 12px;
-      border: 1px dashed rgba(96,165,250,0.3);
-      background: rgba(96,165,250,0.04);
-      border-radius: 10px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
     }
 
-    @media (max-width: 1000px) {
-      .hero, .demo-panel { grid-template-columns: 1fr; }
+    /* RESPONSIVE */
+    @media (max-width: 1100px) {
+      .hero, .demo-grid { grid-template-columns: 1fr; }
+      .node { width: 95px; height: 95px; }
+    }
+
+    @media (max-width: 700px) {
+      .shell { padding: 40px 16px 60px; }
+      h1 { font-size: 1.8rem; }
+      .intro-text { font-size: 1rem; }
+      .card { padding: 18px; }
+      .pipeline-canvas { height: 280px; }
+      .chat-messages { max-height: 240px; }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <header class="topbar">
-      <div class="topbar-inner">
-        <div class="brand">SM<span>.</span></div>
-        <a href="index.html" class="back-link">← Back to portfolio</a>
+    <!-- HEADER -->
+    <header>
+      <div class="header-inner">
+        <div class="logo">SM<span>.</span></div>
+        <a href="index.html" class="nav-link">← Back to Portfolio</a>
       </div>
     </header>
 
+    <!-- MAIN CONTENT -->
     <main class="shell">
+      <!-- HERO -->
       <section class="hero">
         <div>
-          <div class="eyebrow">Live system demo</div>
-          <h1>How AI <span class="gradient">data pipelines</span> actually work</h1>
-          <p class="subtext">
-            This interactive demo shows the end-to-end flow from user query to retrieval, ranking,
-            and final LLM answer. Each stage is clickable and designed to explain what happens in real AI systems.
+          <div class="eyebrow">Interactive Demo</div>
+          <h1>How AI <span class="gradient-text">Pipelines</span> Work</h1>
+          <p class="intro-text">
+            Watch data flow through a real RAG (Retrieval-Augmented Generation) pipeline. 
+            Click each stage to learn how embeddings, retrieval, and ranking work together 
+            to power production AI systems.
           </p>
-
-          <ul class="feature-list">
-            <li>Interactive node-based system visualization</li>
-            <li>Clear explanation of retrieval and ranking flow</li>
-            <li>Built for demos, storytelling, and engineering presentations</li>
+          <ul class="features">
+            <li>5-stage interactive pipeline visualization</li>
+            <li>Click nodes to explore each stage</li>
+            <li>AI chatbot answers your questions</li>
+            <li>Powered by Gemini API (via Netlify Functions)</li>
           </ul>
         </div>
 
-        <div class="demo-panel">
-          <div class="card pipeline-wrap">
-            <div class="panel-title">Pipeline Flow</div>
-            <div id="pipelineCanvas" class="pipeline-canvas"></div>
+        <!-- DEMO PANELS -->
+        <div class="demo-grid">
+          <!-- PIPELINE CARD -->
+          <div class="card pipeline-card">
+            <div class="card-title">Pipeline Visualization</div>
+            <div class="pipeline-canvas" id="pipelineCanvas"></div>
+            <div class="pipeline-info" id="pipelineInfo">
+              Click a node above to see what happens at each stage
+            </div>
           </div>
 
+          <!-- CHAT CARD -->
           <div class="card chat-card">
-            <div class="panel-title">AI Mentor</div>
-            <div id="chatBox" class="chat-box"></div>
-            <div class="chat-input-row">
-              <input id="chatInput" class="chat-input" placeholder="Ask about embeddings, RAG, or retrieval..." />
+            <div class="card-title">AI Mentor</div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-box">
+              <input
+                id="chatInput"
+                class="chat-input"
+                type="text"
+                placeholder="Ask about RAG, embeddings, retrieval..."
+                autocomplete="off"
+              />
               <button id="chatSend" class="chat-send">Send</button>
             </div>
-            <div class="status-box" id="statusBox">
-              Demo mode ready. To enable live Gemini replies, set a secure server-side API key. Do not expose the key in browser JavaScript.
+            <div class="status-note" id="statusNote">
+              💡 Demo mode: Pre-trained responses. Connect Netlify backend for live Gemini API.
             </div>
           </div>
         </div>
@@ -394,122 +492,205 @@
   </div>
 
   <script>
-    const nodeMeta = [
-      { icon: '💬', label: 'User Query' },
-      { icon: '🔢', label: 'Embedding' },
-      { icon: '🔍', label: 'Retrieval' },
-      { icon: '📊', label: 'Re-rank' },
-      { icon: '🤖', label: 'LLM Output' }
+    // ============= PIPELINE CONFIGURATION =============
+    const STAGES = [
+      {
+        icon: '💬',
+        label: 'User Query',
+        description: 'The user asks a question. The system captures intent, context, and any filters before moving forward.',
+        detail: 'Example: "What is retrieval-augmented generation and why is it better than fine-tuning?"'
+      },
+      {
+        icon: '🔢',
+        label: 'Embedding',
+        description: 'Text is converted into numerical vectors (embeddings). Similar meanings live close together in vector space.',
+        detail: 'Example: query → [0.12, -0.45, 0.89, ...] (768-dimensional vector from models like BERT or OpenAI Ada)'
+      },
+      {
+        icon: '🔍',
+        label: 'Retrieval',
+        description: 'A vector database searches for the top-K most similar passages from your knowledge base using cosine similarity or other metrics.',
+        detail: 'Example: Returns 20 candidate chunks sorted by relevance score. Uses hybrid search (BM25 + semantic).'
+      },
+      {
+        icon: '📊',
+        label: 'Re-ranking',
+        description: 'A cross-encoder model re-scores all candidates to find the truly most relevant passages, improving precision.',
+        detail: 'Example: Takes top-20 chunks, re-ranks them, keeps top-5 for context window. Reduces noise and hallucination.'
+      },
+      {
+        icon: '🤖',
+        label: 'LLM Output',
+        description: 'The LLM synthesizes the retrieved context into a grounded answer. Reduced hallucination because it has real sources.',
+        detail: 'Example: "Based on the retrieved documents, RAG is better because [factual synthesis from retrieved chunks]"'
+      }
     ];
 
-    const pipelineCanvas = document.getElementById('pipelineCanvas');
-    const chatBox = document.getElementById('chatBox');
-    const chatInput = document.getElementById('chatInput');
-    const chatSend = document.getElementById('chatSend');
-    const statusBox = document.getElementById('statusBox');
-
-    const stageText = {
-      0: 'User asks a question. The system captures intent and context before passing it forward.',
-      1: 'Embedding converts text into numerical vectors so similar concepts can be compared mathematically.',
-      2: 'Retrieval searches a vector store or knowledge base for the most relevant chunks of data.',
-      3: 'Re-ranking improves precision by prioritizing the most helpful passages before they reach the model.',
-      4: 'The LLM synthesizes context and produces a grounded answer with reduced hallucination.'
+    const DEMO_RESPONSES = {
+      rag: 'RAG (Retrieval-Augmented Generation) combines retrieval (finding relevant docs) with generation (using an LLM to answer). It\'s powerful because the LLM can cite real sources instead of hallucinating. Unlike fine-tuning, RAG doesn\'t require retraining — just update your knowledge base.',
+      embedding: 'Embeddings convert text into vectors (arrays of numbers). Words with similar meaning have similar vectors. We measure similarity using cosine distance. Models like BERT or OpenAI Ada create 768-dimensional embeddings. This is how retrieval systems find relevant documents quickly.',
+      retrieval: 'Retrieval searches a vector database for documents similar to your query. It\'s fast (milliseconds) and uses approximate nearest neighbor search (ANN). Hybrid retrieval combines keyword search (BM25) with semantic search (vectors) for best results.',
+      'rerank': 're-ranking takes the top retrieved results and scores them again using a more sophisticated model (cross-encoder). It improves precision by filtering out noise. Takes ~50-100ms but drastically improves answer quality.',
+      latency: 'End-to-end latency in a RAG system: Query embedding (~10ms) + Retrieval (~50ms) + Re-ranking (~80ms) + LLM generation (~1-2s) = ~1.2-2.2 seconds. The bottleneck is usually LLM generation, not retrieval.',
+      hallucination: 'Hallucination is when an LLM makes up facts. RAG reduces this by grounding the LLM in retrieved documents. Instead of relying on training data alone, the LLM must justify answers with real sources.',
+      production: 'Production RAG systems need: fast retrieval (milliseconds), accurate re-ranking, fallback handling, caching, monitoring, and version control on both the LLM and retrieval model. Observability is critical.',
+      difference: 'Fine-tuning updates the model weights with your data (slow, expensive). RAG retrieves relevant docs at query time (fast, updatable). RAG is usually better for knowledge-heavy tasks unless you need true domain adaptation.',
+      default: 'I\'m an AI systems engineer. I can explain RAG, embeddings, retrieval, re-ranking, latency optimization, and how to build production LLM systems. Ask me anything about the pipeline you see above!'
     };
 
-    function addMessage(text, type) {
-      const msg = document.createElement('div');
-      msg.className = `message ${type}`;
-      msg.innerHTML = text;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+    let activeStageIndex = null;
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatSend = document.getElementById('chatSend');
+    const pipelineInfo = document.getElementById('pipelineInfo');
+    const statusNote = document.getElementById('statusNote');
 
-    function buildPipeline() {
-      const width = pipelineCanvas.clientWidth;
-      const height = pipelineCanvas.clientHeight;
-      const nodes = [];
+    // ============= PIPELINE INITIALIZATION =============
+    function initPipeline() {
+      const canvas = document.getElementById('pipelineCanvas');
+      const width = canvas.offsetWidth;
+      const height = canvas.offsetHeight;
+      const nodeWidth = 110;
+      const nodeHeight = 110;
 
-      nodeMeta.forEach((node, idx) => {
-        const el = document.createElement('div');
-        el.className = 'pipeline-node';
-        el.dataset.index = idx;
-        el.innerHTML = `
-          <div class="pipe-icon">${node.icon}</div>
-          <div class="pipe-label">${node.label}</div>
+      STAGES.forEach((stage, idx) => {
+        const node = document.createElement('div');
+        node.className = 'node';
+        node.dataset.index = idx;
+        node.innerHTML = `
+          <div class="node-icon">${stage.icon}</div>
+          <div class="node-label">${stage.label}</div>
         `;
 
-        const x = 28 + idx * ((width - 120) / (nodeMeta.length - 1));
-        const y = height / 2 - 48;
-        el.style.left = `${x}px`;
-        el.style.top = `${y}px`;
+        // Position nodes horizontally with even spacing
+        const totalWidth = width - nodeWidth;
+        const spacing = totalWidth / (STAGES.length - 1);
+        const x = 10 + idx * spacing;
+        const y = (height - nodeHeight) / 2;
 
-        el.addEventListener('click', () => {
-          document.querySelectorAll('.pipeline-node').forEach(n => n.classList.remove('active'));
-          el.classList.add('active');
-          const text = `
-            <strong>${node.label}</strong><br>${stageText[idx]}
-          `;
-          addMessage(text, 'bot');
-          statusBox.textContent = `Active stage: ${node.label} — ${stageText[idx]}`;
-        });
+        node.style.left = x + 'px';
+        node.style.top = y + 'px';
 
-        pipelineCanvas.appendChild(el);
-        nodes.push(el);
+        node.addEventListener('click', () => activateStage(idx, node));
+        canvas.appendChild(node);
       });
 
-      nodes[0].classList.add('active');
-      statusBox.textContent = `Active stage: ${nodeMeta[0].label} — ${stageText[0]}`;
+      // Auto-activate first stage on load
+      setTimeout(() => {
+        activateStage(0, canvas.querySelector('[data-index="0"]'));
+      }, 600);
     }
 
-    window.addEventListener('load', () => {
-      buildPipeline();
-      addMessage('Hello! Click any stage to explore how the full AI pipeline works.', 'bot');
-    });
+    function activateStage(idx, nodeEl) {
+      // Remove all active states
+      document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
 
-    async function askGemini() {
-      const question = chatInput.value.trim();
-      if (!question) return;
+      // Activate this node
+      nodeEl.classList.add('active');
+      activeStageIndex = idx;
 
-      addMessage(question, 'user');
+      // Update pipeline info
+      const stage = STAGES[idx];
+      pipelineInfo.innerHTML = `
+        <div>
+          <strong>${stage.label}</strong><br>
+          ${stage.description}<br><br>
+          <em>${stage.detail}</em>
+        </div>
+      `;
+
+      // Add bot message about this stage
+      setTimeout(() => {
+        addMessage(`📍 <strong>${stage.label}</strong> — ${stage.description}`, 'bot');
+      }, 200);
+    }
+
+    // ============= CHAT FUNCTIONALITY =============
+    function addMessage(text, role) {
+      const msg = document.createElement('div');
+      msg.className = `message ${role}`;
+      msg.innerHTML = text;
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return msg;
+    }
+
+    function addTyping() {
+      const msg = document.createElement('div');
+      msg.className = 'message bot';
+      msg.innerHTML = '<div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return msg;
+    }
+
+    function getSmartResponse(query) {
+      const lower = query.toLowerCase();
+
+      // Keyword matching for smart responses
+      if (lower.includes('rag')) return DEMO_RESPONSES.rag;
+      if (lower.includes('embedding')) return DEMO_RESPONSES.embedding;
+      if (lower.includes('retriev')) return DEMO_RESPONSES.retrieval;
+      if (lower.includes('rank')) return DEMO_RESPONSES.rerank;
+      if (lower.includes('latency') || lower.includes('fast')) return DEMO_RESPONSES.latency;
+      if (lower.includes('hallucin')) return DEMO_RESPONSES.hallucination;
+      if (lower.includes('production')) return DEMO_RESPONSES.production;
+      if (lower.includes('fine-tun') || lower.includes('difference')) return DEMO_RESPONSES.difference;
+
+      return DEMO_RESPONSES.default;
+    }
+
+    async function sendMessage() {
+      const message = chatInput.value.trim();
+      if (!message || chatSend.disabled) return;
+
+      // Add user message
+      addMessage(message, 'user');
       chatInput.value = '';
       chatSend.disabled = true;
 
-      const loading = document.createElement('div');
-      loading.className = 'message bot';
-      loading.textContent = 'Thinking...';
-      chatBox.appendChild(loading);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      // Show typing indicator
+      const typingMsg = addTyping();
 
       try {
-        // Strongly recommended: do NOT expose an API key in browser JavaScript.
-        // Instead, call a secure backend or serverless function that stores the Gemini key server-side.
-        const response = await fetch('/api/gemini', {
+        // Try to connect to Netlify backend
+        const response = await fetch('/.netlify/functions/gemini', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: question })
+          body: JSON.stringify({ prompt: message, stage: activeStageIndex })
+        }).catch(err => {
+          // Fallback to demo mode if no backend
+          throw new Error('Backend not available');
         });
 
-        if (!response.ok) {
-          throw new Error('Gemini endpoint not configured. Set up a secure backend endpoint first.');
-        }
+        if (!response.ok) throw new Error('API error');
 
         const data = await response.json();
-        const answer = data.answer || 'No answer returned.';
-        loading.remove();
+        typingMsg.remove();
+        addMessage(data.answer || 'No response', 'bot');
+        statusNote.textContent = '✅ Connected to Gemini API via Netlify Functions!';
+
+      } catch (error) {
+        // Demo mode fallback
+        typingMsg.remove();
+        const answer = getSmartResponse(message);
         addMessage(answer, 'bot');
-      } catch (err) {
-        loading.remove();
-        addMessage(`Demo note: ${err.message}`, 'bot');
-        statusBox.textContent = 'Gemini is not connected yet. Use a secure backend proxy to pass the key server-side.';
       } finally {
         chatSend.disabled = false;
         chatInput.focus();
       }
     }
 
-    chatSend.addEventListener('click', askGemini);
-    chatInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') askGemini();
+    // Event listeners
+    chatSend.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !chatSend.disabled) sendMessage();
+    });
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+      initPipeline();
+      addMessage('👋 Welcome! Click the pipeline nodes to learn how RAG systems work. Ask me any questions!', 'bot');
     });
   </script>
 </body>
