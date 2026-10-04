@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RRF Simulator — Data Structures Under the Hood — Shivam Mehta</title>
+  <meta name="description" content="Interactive Reciprocal Rank Fusion simulator: see how BM25 and vector search rankings merge through a hash map and sort in a hybrid RAG retriever."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #050810;
+      --bg2: #0a0f1e;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --blue: #4f9eff;
+      --purple: #a78bfa;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --orange: #fb923c;
+      --text: #f0f4ff;
+      --text-muted: #8896b0;
+      --text-dim: #4a5568;
+      --radius: 16px;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(79,158,255,0.10), transparent 30%),
+        radial-gradient(circle at 85% 80%, rgba(167,139,250,0.08), transparent 35%),
+        var(--bg);
+    }
+    a { color: inherit; }
+
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(5,8,16,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 1400px; margin: 0 auto; padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .logo { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.03em; }
+    .logo span { color: var(--blue); }
+    .crumb { font-family: var(--mono); font-size: 0.75rem; color: var(--text-muted); }
+    .crumb b { color: var(--cyan); font-weight: 500; }
+    .nav-link {
+      color: var(--text-muted); text-decoration: none; font-size: 0.85rem;
+      padding: 8px 14px; border: 1px solid var(--border); border-radius: 10px; transition: all .2s;
+    }
+    .nav-link:hover { color: var(--text); border-color: rgba(79,158,255,0.4); background: rgba(79,158,255,0.08); }
+
+    main { max-width: 1400px; margin: 0 auto; padding: 48px 24px 96px; }
+
+    .eyebrow {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--green);
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px;
+    }
+    h1 { font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 900; letter-spacing: -1.2px; line-height: 1.1; margin-bottom: 16px; }
+    .gradient-text { background: linear-gradient(135deg, var(--blue), var(--purple) 50%, var(--cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .intro { color: var(--text-muted); max-width: 760px; margin-bottom: 28px; }
+
+    .formula {
+      display: inline-flex; flex-wrap: wrap; align-items: center; gap: 12px;
+      font-family: var(--mono); font-size: 0.95rem;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 18px; margin-bottom: 36px;
+    }
+    .formula .eq { color: var(--cyan); }
+    .formula small { color: var(--text-muted); font-size: 0.75rem; }
+
+    /* CONTROLS */
+    .controls {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 16px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; margin-bottom: 24px;
+    }
+    .control label { display: block; font-size: 0.72rem; font-family: var(--mono); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .control label output { color: var(--text); float: right; }
+    select, input[type=range] { width: 100%; }
+    select {
+      background: var(--bg2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 0.9rem;
+    }
+    input[type=range] { accent-color: var(--blue); margin-top: 8px; }
+    .query-text { font-size: 0.82rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
+
+    /* GRID */
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 20px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; min-width: 0;
+    }
+    .card-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+    .card-title { font-weight: 700; font-size: 1rem; }
+    .card-tag { font-family: var(--mono); font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; }
+    .tag-bm25 { color: var(--orange); background: rgba(251,146,60,0.12); }
+    .tag-vec { color: var(--purple); background: rgba(167,139,250,0.12); }
+    .tag-rrf { color: var(--green); background: rgba(52,211,153,0.12); }
+    .card-sub { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; }
+
+    .rank-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .rank-item {
+      display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 9px 10px; transition: border-color .2s, background .2s, transform .25s;
+      cursor: pointer;
+    }
+    .rank-item:hover, .rank-item.hl { border-color: rgba(34,211,238,0.5); background: rgba(34,211,238,0.06); }
+    .rank-num { font-family: var(--mono); font-size: 0.8rem; color: var(--text-dim); text-align: center; }
+    .doc-id { font-family: var(--mono); font-size: 0.75rem; color: var(--cyan); }
+    .doc-title { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .move { display: flex; gap: 4px; }
+    .move button {
+      width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.7rem;
+    }
+    .move button:hover:not(:disabled) { color: var(--text); border-color: var(--blue); }
+    .move button:disabled { opacity: 0.25; cursor: default; }
+    .contrib { font-family: var(--mono); font-size: 0.7rem; color: var(--text-muted); }
+
+    .fused-item { grid-template-columns: 28px 1fr auto; }
+    .score { font-family: var(--mono); font-size: 0.8rem; color: var(--green); text-align: right; }
+    .bar { grid-column: 2 / 4; height: 4px; border-radius: 99px; background: rgba(255,255,255,0.05); overflow: hidden; display: flex; }
+    .bar i { display: block; height: 100%; }
+    .bar .b { background: var(--orange); }
+    .bar .v { background: var(--purple); }
+    .breakdown { grid-column: 2 / 4; font-family: var(--mono); font-size: 0.68rem; color: var(--text-muted); }
+    .cut { border-top: 1px dashed rgba(52,211,153,0.4); margin: 6px 0; position: relative; }
+    .cut span { position: absolute; right: 0; top: -9px; background: var(--bg); padding: 0 6px; font-family: var(--mono); font-size: 0.65rem; color: var(--green); }
+    .dimmed { opacity: 0.45; }
+
+    /* UNDER THE HOOD */
+    .hood { margin-top: 24px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; }
+    .hash-table { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    .bucket {
+      font-family: var(--mono); font-size: 0.72rem; background: var(--bg2);
+      border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+    }
+    .bucket .k { color: var(--cyan); }
+    .bucket .v { color: var(--green); float: right; }
+    .bucket .ops { color: var(--text-dim); display: block; margin-top: 2px; }
+    pre {
+      font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; color: #c9d4ea;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px; overflow-x: auto;
+    }
+    pre .c { color: var(--text-dim); }
+    pre .kw { color: var(--purple); }
+    .complexity { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .cx { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+    .cx b { display: block; font-family: var(--mono); color: var(--cyan); font-size: 0.9rem; }
+    .cx span { font-size: 0.7rem; color: var(--text-muted); }
+
+    .insight {
+      margin-top: 24px; border-left: 3px solid var(--blue); background: rgba(79,158,255,0.06);
+      padding: 14px 18px; border-radius: 0 10px 10px 0; font-size: 0.9rem; color: var(--text-muted);
+    }
+    .insight b { color: var(--text); }
+
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .grid .fused { grid-column: 1 / -1; }
+      .hood { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .grid, .controls { grid-template-columns: 1fr; }
+      .crumb { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo">SM<span>.</span></div>
+      <div class="crumb">data_structures <b>//</b> under_the_hood <b>//</b> rrf_simulator</div>
+      <a href="index.html" class="nav-link">← Portfolio</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="eyebrow">// Data Structures · Under the Hood</div>
+    <h1>Reciprocal Rank <span class="gradient-text">Fusion</span> Simulator</h1>
+    <p class="intro">
+      Hybrid retrieval runs keyword search (BM25) and semantic search (vectors) side by side, then merges the two
+      ranked lists. RRF fuses them using only rank positions, so incompatible score scales don't matter.
+      Reorder either list, tune <code>k</code> and the weights, and watch the fused top-K update.
+    </p>
+
+    <div class="formula">
+      <span>RRF(d)</span><span class="eq">=</span>
+      <span>Σ<sub>r ∈ R</sub> w<sub>r</sub> / (k + rank<sub>r</sub>(d))</span>
+      <small>rank starts at 1 · docs missing from a list contribute 0</small>
+    </div>
+
+    <section class="controls" aria-label="Simulator controls">
+      <div class="control">
+        <label for="scenario">Query scenario</label>
+        <select id="scenario"></select>
+        <div class="query-text" id="queryText"></div>
+      </div>
+      <div class="control">
+        <label for="kRange">k constant <output id="kOut"></output></label>
+        <input id="kRange" type="range" min="1" max="100" value="60"/>
+      </div>
+      <div class="control">
+        <label for="wBm25">BM25 weight <output id="wBm25Out"></output></label>
+        <input id="wBm25" type="range" min="0" max="2" step="0.1" value="1"/>
+      </div>
+      <div class="control">
+        <label for="wVec">Vector weight <output id="wVecOut"></output></label>
+        <input id="wVec" type="range" min="0" max="2" step="0.1" value="1"/>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Keyword search</span><span class="card-tag tag-bm25">BM25</span></div>
+        <p class="card-sub">Exact term matches. Strong on IDs, codes, and jargon.</p>
+        <ol class="rank-list" id="listBm25"></ol>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Semantic search</span><span class="card-tag tag-vec">VECTOR</span></div>
+        <p class="card-sub">Embedding similarity. Strong on paraphrases and intent.</p>
+        <ol class="rank-list" id="listVec"></ol>
+      </div>
+      <div class="card fused">
+        <div class="card-head"><span class="card-title">Fused ranking</span><span class="card-tag tag-rrf">RRF</span></div>
+        <p class="card-sub">Sorted by fused score. Documents above the line go to the re-ranker.</p>
+        <ol class="rank-list" id="listFused"></ol>
+      </div>
+    </section>
+
+    <section class="hood">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Hash map state</span><span class="card-tag tag-rrf">dict[doc_id → score]</span></div>
+        <p class="card-sub">One pass over each list. Each entry shows the score and the updates that built it.</p>
+        <div class="hash-table" id="hashTable"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Implementation</span><span class="card-tag tag-vec">python</span></div>
+        <p class="card-sub">The fusion step from the production retriever.</p>
+<pre><span class="kw">def</span> rrf(ranked_lists, weights, k=<span id="kCode">60</span>, top_k=5):
+    scores = defaultdict(float)   <span class="c"># hash map</span>
+    <span class="kw">for</span> docs, w <span class="kw">in</span> zip(ranked_lists, weights):
+        <span class="kw">for</span> rank, doc_id <span class="kw">in</span> enumerate(docs, 1):
+            scores[doc_id] += w / (k + rank)   <span class="c"># O(1)</span>
+    <span class="kw">return</span> heapq.nlargest(top_k, scores.items(),
+                          key=<span class="kw">lambda</span> x: x[1])</pre>
+        <div class="complexity">
+          <div class="cx"><b>O(N)</b><span>accumulate</span></div>
+          <div class="cx"><b>O(U log K)</b><span>top-K heap</span></div>
+          <div class="cx"><b>O(U)</b><span>memory</span></div>
+        </div>
+      </div>
+    </section>
+
+    <p class="insight" id="insight"></p>
+  </main>
+
+  <script>
+    const TOP_K = 5;
+
+    const DOCS = {
+      d1: 'Refund policy for annual plans',
+      d2: 'Error code E-4012: payment declined',
+      d3: 'How to get your money back',
+      d4: 'Billing FAQ',
+      d5: 'Cancelling a subscription',
+      d6: 'Invoice PDF download',
+      d7: 'Chargebacks and disputes',
+      d8: 'Pricing tiers overview',
+      d9: 'Payment retries and dunning',
+      d10: 'Card update troubleshooting'
+    };
+
+    const SCENARIOS = [
+      {
+        name: 'Paraphrased question',
+        query: '"can I get my money back after a year?"',
+        bm25: ['d4', 'd8', 'd1', 'd6', 'd7', 'd9'],
+        vec: ['d3', 'd1', 'd5', 'd7', 'd4', 'd2']
+      },
+      {
+        name: 'Exact error code',
+        query: '"E-4012 when paying"',
+        bm25: ['d2', 'd10', 'd9', 'd4', 'd6', 'd7'],
+        vec: ['d9', 'd10', 'd4', 'd7', 'd2', 'd8']
+      },
+      {
+        name: 'Lists disagree',
+        query: '"dispute an invoice"',
+        bm25: ['d6', 'd4', 'd8', 'd2', 'd9', 'd10'],
+        vec: ['d7', 'd3', 'd1', 'd5', 'd9', 'd6']
+      }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const state = { scenario: 0, k: 60, wB: 1, wV: 1, bm25: [], vec: [], hover: null };
+
+    function loadScenario(i) {
+      state.scenario = i;
+      state.bm25 = [...SCENARIOS[i].bm25];
+      state.vec = [...SCENARIOS[i].vec];
+      $('queryText').textContent = 'Query: ' + SCENARIOS[i].query;
+      render();
+    }
+
+    function fuse() {
+      const map = new Map();
+      const add = (list, w, src) => list.forEach((id, idx) => {
+        const rank = idx + 1;
+        const c = w / (state.k + rank);
+        const e = map.get(id) || { id, score: 0, b: 0, v: 0, rb: null, rv: null };
+        e.score += c;
+        if (src === 'b') { e.b = c; e.rb = rank; } else { e.v = c; e.rv = rank; }
+        map.set(id, e);
+      });
+      add(state.bm25, state.wB, 'b');
+      add(state.vec, state.wV, 'v');
+      return { map, ranked: [...map.values()].sort((a, b) => b.score - a.score) };
+    }
+
+    const fmt = (n) => n.toFixed(4);
+
+    function rankItem(id, idx, list, key, contribution) {
+      const li = document.createElement('li');
+      li.className = 'rank-item' + (state.hover === id ? ' hl' : '');
+      li.dataset.id = id;
+      li.innerHTML = `
+        <span class="rank-num">${idx + 1}</span>
+        <div style="min-width:0">
+          <div class="doc-id">${id} <span class="contrib">+${fmt(contribution)}</span></div>
+          <div class="doc-title"></div>
+        </div>
+        <div class="move">
+          <button aria-label="Move ${id} up" ${idx === 0 ? 'disabled' : ''}>▲</button>
+          <button aria-label="Move ${id} down" ${idx === list.length - 1 ? 'disabled' : ''}>▼</button>
+        </div>`;
+      li.querySelector('.doc-title').textContent = DOCS[id];
+      const [up, down] = li.querySelectorAll('button');
+      const swap = (j) => { [list[idx], list[j]] = [list[j], list[idx]]; render(); };
+      up.addEventListener('click', (e) => { e.stopPropagation(); swap(idx - 1); });
+      down.addEventListener('click', (e) => { e.stopPropagation(); swap(idx + 1); });
+      bindHover(li, id);
+      return li;
+    }
+
+    function bindHover(el, id) {
+      el.addEventListener('mouseenter', () => setHover(id));
+      el.addEventListener('mouseleave', () => setHover(null));
+    }
+
+    function setHover(id) {
+      state.hover = id;
+      document.querySelectorAll('.rank-item').forEach((el) => el.classList.toggle('hl', el.dataset.id === id));
+    }
+
+    function render() {
+      $('kOut').textContent = state.k;
+      $('kCode').textContent = state.k;
+      $('wBm25Out').textContent = state.wB.toFixed(1);
+      $('wVecOut').textContent = state.wV.toFixed(1);
+
+      const { map, ranked } = fuse();
+
+      const lb = $('listBm25'); lb.replaceChildren();
+      state.bm25.forEach((id, i) => lb.appendChild(rankItem(id, i, state.bm25, 'b', map.get(id).b)));
+      const lv = $('listVec'); lv.replaceChildren();
+      state.vec.forEach((id, i) => lv.appendChild(rankItem(id, i, state.vec, 'v', map.get(id).v)));
+
+      const max = ranked[0]?.score || 1;
+      const lf = $('listFused'); lf.replaceChildren();
+      ranked.forEach((e, i) => {
+        if (i === TOP_K) {
+          const cut = document.createElement('li');
+          cut.className = 'cut';
+          cut.innerHTML = `<span>top-${TOP_K} cutoff</span>`;
+          lf.appendChild(cut);
+        }
+        const li = document.createElement('li');
+        li.className = 'rank-item fused-item' + (i >= TOP_K ? ' dimmed' : '') + (state.hover === e.id ? ' hl' : '');
+        li.dataset.id = e.id;
+        const parts = [];
+        if (e.rb) parts.push(`${state.wB.toFixed(1)}/(${state.k}+${e.rb})`);
+        if (e.rv) parts.push(`${state.wV.toFixed(1)}/(${state.k}+${e.rv})`);
+        li.innerHTML = `
+          <span class="rank-num">${i + 1}</span>
+          <div style="min-width:0">
+            <div class="doc-id">${e.id}</div>
+            <div class="doc-title"></div>
+          </div>
+          <span class="score">${fmt(e.score)}</span>
+          <div class="bar"><i class="b" style="width:${(e.b / max) * 100}%"></i><i class="v" style="width:${(e.v / max) * 100}%"></i></div>
+          <div class="breakdown">${parts.join(' + ')}</div>`;
+        li.querySelector('.doc-title').textContent = DOCS[e.id];
+        bindHover(li, e.id);
+        lf.appendChild(li);
+      });
+
+      const ht = $('hashTable'); ht.replaceChildren();
+      map.forEach((e) => {
+        const b = document.createElement('div');
+        b.className = 'bucket';
+        const ops = [e.rb && `bm25@${e.rb}`, e.rv && `vec@${e.rv}`].filter(Boolean).join(', ');
+        b.innerHTML = `<span class="k">"${e.id}"</span><span class="v">${fmt(e.score)}</span><span class="ops">${ops}</span>`;
+        ht.appendChild(b);
+      });
+
+      renderInsight(ranked);
+    }
+
+    function renderInsight(ranked) {
+      const top = ranked[0];
+      const both = ranked.slice(0, TOP_K).filter((e) => e.rb && e.rv).length;
+      let msg = `<b>${top.id}</b> wins with ${fmt(top.score)}. ${both} of the top ${TOP_K} appear in both lists. Agreement between retrievers is rewarded. `;
+      if (state.k <= 10) msg += 'With a small <b>k</b>, the #1 spot in either list dominates: rank 1 is worth far more than rank 3.';
+      else if (state.k >= 80) msg += 'With a large <b>k</b>, rank differences flatten out, so appearing in both lists matters more than where.';
+      else msg += '<b>k = 60</b> is the common default from the original RRF paper. It balances top-rank emphasis against consensus.';
+      $('insight').innerHTML = msg;
+    }
+
+    // Wire up controls
+    SCENARIOS.forEach((s, i) => {
+      const o = document.createElement('option');
+      o.value = i; o.textContent = s.name;
+      $('scenario').appendChild(o);
+    });
+    $('scenario').addEventListener('change', (e) => loadScenario(+e.target.value));
+    $('kRange').addEventListener('input', (e) => { state.k = +e.target.value; render(); });
+    $('wBm25').addEventListener('input', (e) => { state.wB = +e.target.value; render(); });
+    $('wVec').addEventListener('input', (e) => { state.wV = +e.target.value; render(); });
+
+    loadScenario(0);
+  </script>
+</body>
+</html>
