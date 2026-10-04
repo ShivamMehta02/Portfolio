@@ -538,6 +538,13 @@
       default: 'I\'m an AI systems engineer. I can explain RAG, embeddings, retrieval, re-ranking, latency optimization, and how to build production LLM systems. Ask me anything about the pipeline you see above!'
     };
 
+    // Same-origin when served from Netlify. If this page is hosted elsewhere
+    // (e.g. GitHub Pages), set this to your full Netlify function URL:
+    // 'https://joyful-bunny-cd8d62.netlify.app/.netlify/functions/gemini'
+    const GEMINI_ENDPOINT = location.hostname.endsWith('netlify.app') || location.hostname === 'localhost'
+      ? '/.netlify/functions/gemini'
+      : 'https://joyful-bunny-cd8d62.netlify.app/.netlify/functions/gemini';
+
     let activeStageIndex = null;
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
@@ -606,10 +613,12 @@
     }
 
     // ============= CHAT FUNCTIONALITY =============
-    function addMessage(text, role) {
+    function addMessage(text, role, { asText = false } = {}) {
       const msg = document.createElement('div');
       msg.className = `message ${role}`;
-      msg.innerHTML = text;
+      // User input and AI output are rendered as plain text to avoid HTML injection
+      if (asText) msg.textContent = text;
+      else msg.innerHTML = text;
       chatMessages.appendChild(msg);
       chatMessages.scrollTop = chatMessages.scrollHeight;
       return msg;
@@ -645,7 +654,7 @@
       if (!message || chatSend.disabled) return;
 
       // Add user message
-      addMessage(message, 'user');
+      addMessage(message, 'user', { asText: true });
       chatInput.value = '';
       chatSend.disabled = true;
 
@@ -654,7 +663,7 @@
 
       try {
         // Try to connect to Netlify backend
-        const response = await fetch('/.netlify/functions/gemini', {
+        const response = await fetch(GEMINI_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: message, stage: activeStageIndex })
@@ -667,14 +676,15 @@
 
         const data = await response.json();
         typingMsg.remove();
-        addMessage(data.answer || 'No response', 'bot');
+        addMessage(data.answer || 'No response', 'bot', { asText: true });
         statusNote.textContent = '✅ Connected to Gemini API via Netlify Functions!';
 
       } catch (error) {
         // Demo mode fallback
         typingMsg.remove();
         const answer = getSmartResponse(message);
-        addMessage(answer, 'bot');
+        addMessage(answer, 'bot', { asText: true });
+        statusNote.textContent = '💡 Demo mode: live Gemini API unavailable, showing pre-written responses.';
       } finally {
         chatSend.disabled = false;
         chatInput.focus();
