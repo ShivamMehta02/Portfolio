@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
@@ -7,7 +8,9 @@ export default defineConfig({
     outDir: 'dist',
     rollupOptions: {
       input: {
-        main: './pipeline-builder.html'
+        index: resolve(__dirname, 'index.html'),
+        pipeline: resolve(__dirname, 'pipeline-builder.html'),
+        explorer: resolve(__dirname, 'rag-explorer.html')
       }
     }
   }
