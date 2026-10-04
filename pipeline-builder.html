@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Data Pipeline Studio — Interactive Node Architecture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'surface-base': '#07090e',
+              'surface-canvas': '#0c0e13',
+              'surface-panel': '#131822',
+              'surface-elevated': '#1a2233',
+              'telemetry-cyan': '#00e5ff'
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        margin: 0;
+        background-color: #07090e;
+        color: #f0f6fc;
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
