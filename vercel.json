@@ -1,7 +1,7 @@
-module.exports = {
-  functions: {
-    'api/**/*.js': {
-      maxDuration: 10
+{
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 10
     }
   }
-};
+}
